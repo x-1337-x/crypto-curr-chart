@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 const DB = require('./db/models');
 
 const PORT = 3000;
@@ -34,7 +35,9 @@ app.post('/register', async (req, res) => {
 	}
 
 	try {
-		await DB.User.create(req.body);
+		let user = req.body;
+		user.password = await bcrypt.hash(user.password, 10);
+		let dbUser = await DB.User.create(user);
 		res.send('User created');
 	} catch (error) {
 		console.log(error);
@@ -98,7 +101,8 @@ app.post('/login', async (req, res) => {
 			res.status(400).send('Wrong email or password');
 			return;
 		} else {
-			if (user.password === req.body.password) {
+			const match = await bcrypt.compare(req.body.password, user.password);
+			if (match) {
 				res.send('Login successful');
 				return;
 			} else {
