@@ -161,3 +161,98 @@ const checkAuth = (req, res, next) => {
 app.use('/protected', checkAuth, (req, res) => {
 	res.send(`Protected route data ${res.locals.userId}`);
 });
+
+app.post('/api/coins', async (req, res) => {
+	try {
+		let coin = await DB.Coin.create(req.body);
+		res.send(coin);
+	} catch (error) {
+		res.status(500).end();
+		return;
+	}
+});
+
+app.get('/submit', (req, res) => {
+	res.send(`
+    <form action="/api/coins" method="post">
+    <h1>ADD A COIN</h1>
+    <div>
+        <label>
+            Coin Name<br/>
+            <input type="text" name="name" required>
+        </label>
+    </div>
+    <div>
+        <label>
+            Symbol<br/>
+            <input type="text" name="symbol" required><br/>
+        </label>
+    </div>
+    <div>
+        <label>
+            Description<br/>
+            <textarea name="description" required></textarea>
+        </label>
+    </div>
+    <div>
+        <button type="submit">SUBMIT</button>
+    </div>
+  </form>
+  `);
+});
+
+app.get('/api/coins/:id', async (req, res) => {
+	try {
+		let coin = await DB.Coin.findByPk(req.params.id);
+		if (!coin) {
+			res.sendStatus(404);
+			return;
+		}
+		res.json(coin);
+		return;
+	} catch (error) {
+		res.sendStatus(500);
+		return;
+	}
+});
+
+app.put('/api/coins/:id', async (req, res) => {
+	try {
+		await DB.Coin.update(req.body, {
+			where: {
+				id: req.params.id,
+			},
+		});
+		res.redirect(`/api/coins/${req.params.id}`);
+		return;
+	} catch (error) {
+		res.sendStatus(500);
+		return;
+	}
+});
+
+app.delete('/api/coins/:id', async (req, res) => {
+	try {
+		await DB.Coin.destroy({
+			where: {
+				id: req.params.id,
+			},
+		});
+		res.end();
+		return;
+	} catch (error) {
+		res.sendStatus(500);
+		return;
+	}
+});
+
+app.get('/api/coins', async (req, res) => {
+	try {
+		const coins = await DB.Coin.findAll();
+		res.json(coins);
+		return;
+	} catch (error) {
+		res.sendStatus(500);
+		return;
+	}
+});
