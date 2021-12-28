@@ -142,3 +142,22 @@ app.post('/validateToken', (req, res) => {
 		res.json({ token });
 	});
 });
+
+const checkAuth = (req, res, next) => {
+	const token = req.body.token || req.query.token || req.headers.token;
+
+	if (!token) return res.status(403).end();
+
+	jwt.verify(token, req.app.get('secret'), (err, decoded) => {
+		if (err) {
+			return res.status(403).json({ err: err.message });
+		} else {
+			res.locals.userId = decoded.userId;
+			next();
+		}
+	});
+};
+
+app.use('/protected', checkAuth, (req, res) => {
+	res.send(`Protected route data ${res.locals.userId}`);
+});
