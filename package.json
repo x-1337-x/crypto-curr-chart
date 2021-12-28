@@ -1,0 +1,24 @@
+{
+	"name": "crypto-curr-chart",
+	"version": "1.0.0",
+	"description": "a coin chart utilizing coingecko API",
+	"main": "index.js",
+	"scripts": {
+		"test": "test",
+		"start": "nodemon index.js"
+	},
+	"author": "x-1337-x",
+	"license": "ISC",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"env": "^0.0.2",
+		"express": "^4.17.2",
+		"nodemon": "^2.0.15",
+		"pg": "^8.7.1",
+		"pg-hstore": "^2.3.4",
+		"sequelize": "^7.0.0-alpha.2"
+	},
+	"devDependencies": {
+		"sequelize-cli": "^6.3.0"
+	}
+}

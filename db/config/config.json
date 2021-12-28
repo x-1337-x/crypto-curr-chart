@@ -1,0 +1,16 @@
+{
+	"development": {
+		"username": "nlxtikqohobtaw",
+		"password": "bec1fc294b909b7ad781b154e6a30f308103fecc0faa305a0e6caa4ba119e991",
+		"database": "dcgfiajid84r98",
+		"host": "ec2-34-247-118-233.eu-west-1.compute.amazonaws.com",
+		"dialect": "postgres",
+		"protocol": "postgres",
+		"dialectOptions": {
+			"ssl": {
+				"require": true,
+				"rejectUnauthorized": false
+			}
+		}
+	}
+}
