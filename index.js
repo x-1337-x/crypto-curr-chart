@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const DB = require('./db/models');
 
 const PORT = 3000;
@@ -10,6 +11,12 @@ const app = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.set('secret', 'biliberda');
+
+const jwtOptions = {
+	expiresIn: '6h',
+};
 
 DB.sequelize.sync({ force: false }).then(() => {
 	app.listen(PORT, () => {
@@ -103,7 +110,11 @@ app.post('/login', async (req, res) => {
 		} else {
 			const match = await bcrypt.compare(req.body.password, user.password);
 			if (match) {
-				res.send('Login successful');
+				const payload = { userId: user.id };
+
+				const token = jwt.sign(payload, req.app.get('secret'), jwtOptions);
+
+				res.json({ token });
 				return;
 			} else {
 				res.status(400).send('Wrong email or password');
@@ -114,4 +125,20 @@ app.post('/login', async (req, res) => {
 		res.status(500);
 		return;
 	}
+});
+
+app.post('/validateToken', (req, res) => {
+	const token = req.body.token || req.query.token || req.headers.token;
+
+	jwt.verify(token, req.app.get('secret'), (err, decoded) => {
+		if (err) {
+			return res.status(400).json({ err: err.message });
+		}
+
+		const payload = { userId: decoded.userId };
+
+		const token = jwt.sign(payload, req.app.get('secret'), jwtOptions);
+
+		res.json({ token });
+	});
 });
