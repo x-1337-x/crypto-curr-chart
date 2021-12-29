@@ -8,18 +8,19 @@ module.exports = (sequelize, DataTypes) => {
 		 */
 		static associate(models) {
 			// define association here
+			models.Coin.belongsToMany(models.User, {
+				through: 'Vote',
+				foreignKey: 'coinId',
+			});
+
+			models.User.belongsToMany(models.Coin, {
+				through: 'Vote',
+				foreignKey: 'userId',
+			});
 		}
 	}
 	Vote.init(
 		{
-			userId: {
-				type: DataTypes.INTEGER,
-				allowNull: false,
-			},
-			coinId: {
-				type: DataTypes.INTEGER,
-				allowNull: false,
-			},
 			date: {
 				type: DataTypes.DATEONLY,
 			},

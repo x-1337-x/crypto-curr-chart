@@ -41,6 +41,11 @@ app.post('/register', async (req, res) => {
 	// 	res.status(500).end();
 	// 	return;
 	// }
+	let { password, repeatPassword } = req.body;
+	if (password !== repeatPassword) {
+		res.status(400).send('Password does not match Repeat password');
+		return;
+	}
 
 	try {
 		let user = req.body;
@@ -67,6 +72,12 @@ app.get('/register', (req, res) => {
         <label>
             Password<br/>
             <input type="password" name="password" required><br/>
+        </label>
+    </div>
+    <div>
+        <label>
+            Repeat password<br/>
+            <input type="password" name="repeatPassword" required><br/>
         </label>
     </div>
     <div>
@@ -298,6 +309,34 @@ app.delete('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 			where: { coinId: req.params.coinId },
 		});
 		res.send('The coin has been removed from the watchlist');
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+		return;
+	}
+});
+
+app.get('/api/votes', checkAuth, async (req, res) => {
+	try {
+		let votes = await DB.sequelize.models.Vote.findAll({
+			userId: res.locals.userId,
+		});
+		res.json(votes);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+		return;
+	}
+});
+
+app.post('/api/votes/:coinId', checkAuth, async (req, res) => {
+	try {
+		let vote = await DB.sequelize.models.Vote.create({
+			userId: res.locals.userId,
+			coinId: req.params.coinId,
+			date: new Date().toDateString(),
+		});
+		res.json(vote);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
