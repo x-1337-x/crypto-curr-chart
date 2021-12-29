@@ -7,7 +7,7 @@ export const Watchlist = () => {
   const [coins, setCoins] = React.useState([]);
   const [status, setStatus] = React.useState("loading");
 
-  React.useEffect(() => {
+  const fetchCoins = () =>
     fetch("//localhost:3000/api/watchlist", {
       headers: {
         token: state.auth.token,
@@ -27,6 +27,13 @@ export const Watchlist = () => {
       .finally(() => {
         setStatus("done");
       });
+
+  const onWatchListChange = React.useCallback(() => {
+    fetchCoins();
+  }, []);
+
+  React.useEffect(() => {
+    fetchCoins();
   }, []);
 
   return (
@@ -37,7 +44,7 @@ export const Watchlist = () => {
           "loading"
         ) : coins.length ? (
           <>
-            <CoinsTable coins={coins} />
+            <CoinsTable coins={coins} onWatchListChange={onWatchListChange} />
           </>
         ) : (
           "List is empty"

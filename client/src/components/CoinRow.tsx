@@ -3,7 +3,7 @@ import { useAppState } from "../AppContext";
 
 export const CoinRow = (props) => {
   const { state, dispatch } = useAppState();
-  const { coin } = props;
+  const { coin, onWatchListChange } = props;
 
   const fetchWatchlist = () =>
     fetch("//localhost:3000/api/watchlist", {
@@ -38,7 +38,10 @@ export const CoinRow = (props) => {
           return Promise.reject();
         }
       })
-      .then(fetchWatchlist)
+      .then(() => {
+        fetchWatchlist();
+        onWatchListChange();
+      })
       .catch(console.log);
   };
 
@@ -55,7 +58,10 @@ export const CoinRow = (props) => {
           return Promise.reject();
         }
       })
-      .then(fetchWatchlist)
+      .then(() => {
+        fetchWatchlist();
+        onWatchListChange();
+      })
       .catch(console.log);
   };
 

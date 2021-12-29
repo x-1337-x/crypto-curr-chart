@@ -1,7 +1,7 @@
 import { CoinRow } from "./CoinRow";
 
 export const CoinsTable = (props) => {
-  const { coins } = props;
+  const { coins, onWatchListChange = () => {} } = props;
 
   return (
     <table>
@@ -16,7 +16,11 @@ export const CoinsTable = (props) => {
       </thead>
       <tbody>
         {coins.map((coin) => (
-          <CoinRow key={coin.symbol} coin={coin} />
+          <CoinRow
+            key={coin.symbol}
+            coin={coin}
+            onWatchListChange={onWatchListChange}
+          />
         ))}
       </tbody>
     </table>
