@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "start:client": "npx parcel serve ./client/src/index.html"
   },
   "author": "x-1337-x",
   "license": "ISC",
