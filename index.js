@@ -238,7 +238,7 @@ app.put('/api/coins/:id', async (req, res) => {
 				id: req.params.id,
 			},
 		});
-		res.redirect(`/api/coins/${req.params.id}`);
+		res.end();
 		return;
 	} catch (error) {
 		console.log(error);
