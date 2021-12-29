@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 export const Register = () => {
   const emailRef = React.createRef<HTMLInputElement>();
   const passwordRef = React.createRef<HTMLInputElement>();
+  const repeatPasswordRef = React.createRef<HTMLInputElement>();
   const [errorMessage, setErrorMessage] = React.useState("");
 
   let navigate = useNavigate();
@@ -16,6 +17,7 @@ export const Register = () => {
     const payload = {
       email: emailRef.current.value,
       password: passwordRef.current.value,
+      repeatPassword: repeatPasswordRef.current.value,
     };
 
     const response = await fetch("//localhost:3000/register", {
@@ -60,6 +62,17 @@ export const Register = () => {
             ref={passwordRef}
             type="password"
             name="password"
+            placeholder="password"
+            required
+          />
+        </label>
+      </div>
+      <div>
+        <label>
+          <input
+            ref={repeatPasswordRef}
+            type="password"
+            name="repeatPassword"
             placeholder="password"
             required
           />
