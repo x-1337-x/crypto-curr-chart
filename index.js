@@ -37,6 +37,7 @@ app.post('/register', async (req, res) => {
 			return;
 		}
 	} catch (error) {
+		console.log(error);
 		res.status(500).end();
 		return;
 	}
@@ -122,6 +123,7 @@ app.post('/login', async (req, res) => {
 			}
 		}
 	} catch (error) {
+		console.log(error);
 		res.status(500);
 		return;
 	}
@@ -167,6 +169,7 @@ app.post('/api/coins', async (req, res) => {
 		let coin = await DB.Coin.create(req.body);
 		res.send(coin);
 	} catch (error) {
+		console.log(error);
 		res.status(500).end();
 		return;
 	}
@@ -211,6 +214,7 @@ app.get('/api/coins/:id', async (req, res) => {
 		res.json(coin);
 		return;
 	} catch (error) {
+		console.log(error);
 		res.sendStatus(500);
 		return;
 	}
@@ -226,6 +230,7 @@ app.put('/api/coins/:id', async (req, res) => {
 		res.redirect(`/api/coins/${req.params.id}`);
 		return;
 	} catch (error) {
+		console.log(error);
 		res.sendStatus(500);
 		return;
 	}
@@ -241,6 +246,7 @@ app.delete('/api/coins/:id', async (req, res) => {
 		res.end();
 		return;
 	} catch (error) {
+		console.log(error);
 		res.sendStatus(500);
 		return;
 	}
@@ -252,6 +258,50 @@ app.get('/api/coins', async (req, res) => {
 		res.json(coins);
 		return;
 	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+		return;
+	}
+});
+
+app.get('/api/watchlist', async (req, res) => {
+	try {
+		let watchlist = await DB.Watchlist.findAll({
+			where: {
+				userId: req.body.userId,
+			},
+		});
+		if (watchlist.length < 1) {
+			res.sendStatus(404);
+			return;
+		}
+		res.json(watchlist);
+		return;
+	} catch (error) {
+		console.log(error);
+		sendStatus(500);
+		return;
+	}
+});
+
+app.post('/api/watchlist/:coinId', async (req, res) => {
+	try {
+		let entry = { userId: req.body.userId, coinId: req.params.coinId };
+		await DB.Watchlist.create(entry);
+		res.send('The coin has been added to the watchlist');
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+		return;
+	}
+});
+
+app.delete('/api/watchlist/:coinId', async (req, res) => {
+	try {
+		await DB.Watchlist.destroy({ where: { coinId: req.params.coinId } });
+		res.send('The coin has been removed from the watchlist');
+	} catch (error) {
+		console.log(error);
 		res.sendStatus(500);
 		return;
 	}
