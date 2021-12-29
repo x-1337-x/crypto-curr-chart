@@ -39,7 +39,7 @@ export const Home = () => {
         if (watchlist.status === "fulfilled") {
           dispatch({
             type: "set_watchlist",
-            watchlist: watchlist.value.map((el) => el.coinId),
+            watchlist: watchlist.value.map((el) => el.id),
           });
         }
       })
