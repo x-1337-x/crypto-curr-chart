@@ -38,7 +38,7 @@ export const EditCoin = () => {
     }
 
     if (response.status === 200) {
-      alert("Coin was created");
+      alert("Coin was updated");
     } else {
       const message = await response.text();
       setErrorMessage(message);
@@ -74,7 +74,7 @@ export const EditCoin = () => {
       ) : coin ? (
         <>
           <form onSubmit={onSubmit}>
-            <h1>Add new Coin</h1>
+            <h1>Edit Coin - {coin.name}</h1>
             <div>
               <label>
                 <input
