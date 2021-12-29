@@ -23,11 +23,21 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			date: {
 				type: DataTypes.DATEONLY,
+				primaryKey: true,
+			},
+			userId: {
+				type: DataTypes.INTEGER,
+				primaryKey: true,
+			},
+			coinId: {
+				type: DataTypes.INTEGER,
+				primaryKey: true,
 			},
 		},
 		{
 			sequelize,
 			modelName: 'Vote',
+			// indexes: [{ unique: true, fields: ['userId', 'coinId', 'date'] }],
 		}
 	);
 	return Vote;
