@@ -293,7 +293,7 @@ app.get('/api/watchlist', checkAuth, async (req, res) => {
 
 app.post('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 	try {
-		let entry = { userId: req.body.userId, coinId: req.params.coinId };
+		let entry = { userId: res.locals.userId, coinId: req.params.coinId };
 		await DB.sequelize.models.Watchlist.create(entry);
 		res.send('The coin has been added to the watchlist');
 	} catch (error) {
@@ -306,7 +306,7 @@ app.post('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 app.delete('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 	try {
 		await DB.sequelize.models.Watchlist.destroy({
-			where: { coinId: req.params.coinId },
+			where: { coinId: req.params.coinId, userId: res.locals.userId },
 		});
 		res.send('The coin has been removed from the watchlist');
 	} catch (error) {
