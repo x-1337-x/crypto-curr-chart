@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
 		 */
 		static associate(models) {
 			// define association here
+			Coin.belongsToMany(models.User, {
+				through: 'Watchlist',
+				foreignKey: 'coinId',
+			});
 		}
 	}
 	Coin.init(

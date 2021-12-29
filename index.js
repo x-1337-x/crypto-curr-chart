@@ -25,22 +25,22 @@ DB.sequelize.sync({ force: false }).then(() => {
 });
 
 app.post('/register', async (req, res) => {
-	try {
-		let users = await DB.User.findAll({
-			where: {
-				email: req.body.email,
-			},
-		});
+	// try {
+	// 	let users = await DB.User.findAll({
+	// 		where: {
+	// 			email: req.body.email,
+	// 		},
+	// 	});
 
-		if (users.length > 0) {
-			res.status(400).send('Registration failure');
-			return;
-		}
-	} catch (error) {
-		console.log(error);
-		res.status(500).end();
-		return;
-	}
+	// 	if (users.length > 0) {
+	// 		res.status(400).send('Registration failure');
+	// 		return;
+	// 	}
+	// } catch (error) {
+	// 	console.log(error);
+	// 	res.status(500).end();
+	// 	return;
+	// }
 
 	try {
 		let user = req.body;
@@ -264,17 +264,13 @@ app.get('/api/coins', async (req, res) => {
 	}
 });
 
-app.get('/api/watchlist', async (req, res) => {
+app.get('/api/watchlist', checkAuth, async (req, res) => {
 	try {
-		let watchlist = await DB.Watchlist.findAll({
+		let watchlist = await DB.sequelize.models.Watchlist.findAll({
 			where: {
-				userId: req.body.userId,
+				userId: res.locals.userId,
 			},
 		});
-		if (watchlist.length < 1) {
-			res.sendStatus(404);
-			return;
-		}
 		res.json(watchlist);
 		return;
 	} catch (error) {
@@ -284,10 +280,10 @@ app.get('/api/watchlist', async (req, res) => {
 	}
 });
 
-app.post('/api/watchlist/:coinId', async (req, res) => {
+app.post('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 	try {
 		let entry = { userId: req.body.userId, coinId: req.params.coinId };
-		await DB.Watchlist.create(entry);
+		await DB.sequelize.models.Watchlist.create(entry);
 		res.send('The coin has been added to the watchlist');
 	} catch (error) {
 		console.log(error);
@@ -296,9 +292,11 @@ app.post('/api/watchlist/:coinId', async (req, res) => {
 	}
 });
 
-app.delete('/api/watchlist/:coinId', async (req, res) => {
+app.delete('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 	try {
-		await DB.Watchlist.destroy({ where: { coinId: req.params.coinId } });
+		await DB.sequelize.models.Watchlist.destroy({
+			where: { coinId: req.params.coinId },
+		});
 		res.send('The coin has been removed from the watchlist');
 	} catch (error) {
 		console.log(error);

@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
 		 */
 		static associate(models) {
 			// define association here
+			User.belongsToMany(models.Coin, {
+				through: 'Watchlist',
+				foreignKey: 'userId',
+			});
 		}
 	}
 	User.init(
@@ -15,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
 			email: {
 				type: DataTypes.STRING,
 				validate: { notNull: false, notEmpty: true },
+				unique: true,
 			},
 			password: {
 				type: DataTypes.STRING,
