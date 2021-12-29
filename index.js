@@ -281,8 +281,19 @@ app.get('/api/watchlist', checkAuth, async (req, res) => {
 			where: {
 				userId: res.locals.userId,
 			},
+			raw: true,
 		});
-		res.json(watchlist);
+		let coinIds = watchlist.map((el) => {
+			return el.coinId;
+		});
+		let coins = await DB.sequelize.models.Coin.findAll({
+			where: {
+				id: {
+					[DB.Sequelize.Op.in]: coinIds,
+				},
+			},
+		});
+		res.json(coins);
 		return;
 	} catch (error) {
 		console.log(error);
