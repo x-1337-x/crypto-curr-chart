@@ -1,0 +1,59 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
+
+* {
+  outline: none;
+}
+
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+}
+
+body,
+html,
+input,
+textarea,
+button {
+  font-family: "Open Sans", sans-serif;
+  font-size: 18px;
+}
+
+.page {
+  max-width: 1000px;
+  padding: 25px;
+  margin: auto;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+}
+
+.header .logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.header .nav {
+  margin-left: auto;
+}
+
+.coins-list {
+}
+
+.coins-list table {
+  width: 100%;
+}
+
+.coins-list thead td {
+  font-weight: bold;
+}
+
+.coins-list tbody tr:nth-child(2n + 1) {
+  background: #f9f9f9;
+}
+
+.content {
+  margin: 1rem 0;
+}
