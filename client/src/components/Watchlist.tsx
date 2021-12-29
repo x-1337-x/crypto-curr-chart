@@ -1,5 +1,6 @@
 import React from "react";
 import { useAppState } from "../AppContext";
+import { CoinsTable } from "./CoinsTable";
 
 export const Watchlist = () => {
   const { state } = useAppState();
@@ -35,7 +36,9 @@ export const Watchlist = () => {
         {status === "loading" ? (
           "loading"
         ) : coins.length ? (
-          <>{JSON.stringify(coins)}</>
+          <>
+            <CoinsTable coins={coins} />
+          </>
         ) : (
           "List is empty"
         )}
