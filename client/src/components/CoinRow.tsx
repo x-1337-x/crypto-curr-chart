@@ -21,7 +21,7 @@ export const CoinRow = (props) => {
       .then((watchlist) => {
         dispatch({
           type: "set_watchlist",
-          watchlist: watchlist.map((el) => el.coinId),
+          watchlist: watchlist.map((el) => el.id),
         });
       });
 
