@@ -1,39 +1,40 @@
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Vote extends Model {
+  class Watchlist extends Model {
     static associate(models) {
       models.User.belongsToMany(models.Coin, {
-        through: models.Vote,
+        through: models.Watchlist,
         foreignKey: "userId",
-        as: "VoteCoin",
+        as: "WatchlistCoin",
       });
       models.Coin.belongsToMany(models.User, {
-        through: models.Vote,
+        through: models.Watchlist,
         foreignKey: "coinId",
-        as: "VoteUser",
+        as: "WatchlistUser",
       });
     }
   }
-  Vote.init(
+  Watchlist.init(
     {
-      date: {
-        type: DataTypes.DATEONLY,
-        primaryKey: true,
-      },
       userId: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
+        references: {
+          model: "User",
+          key: "id",
+        },
       },
       coinId: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
+        references: {
+          model: "Coin",
+          key: "id",
+        },
       },
     },
     {
       sequelize,
-      modelName: "Vote",
-      // indexes: [{ unique: true, fields: ['userId', 'coinId', 'date'] }],
+      modelName: "Watchlist",
     }
   );
-  return Vote;
+  return Watchlist;
 };
