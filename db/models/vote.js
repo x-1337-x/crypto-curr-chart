@@ -1,39 +1,39 @@
-const { Model } = require("sequelize");
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Vote extends Model {
-    static associate(models) {
-      models.User.belongsToMany(models.Coin, {
-        through: models.Vote,
-        foreignKey: "userId",
-        as: "VoteCoin",
-      });
-      models.Coin.belongsToMany(models.User, {
-        through: models.Vote,
-        foreignKey: "coinId",
-        as: "VoteUser",
-      });
+    class Vote extends Model {
+        static associate(models) {
+            models.User.belongsToMany(models.Coin, {
+                through: models.Vote,
+                foreignKey: 'user_id',
+                as: 'VoteCoin',
+            });
+            models.Coin.belongsToMany(models.User, {
+                through: models.Vote,
+                foreignKey: 'coin_id',
+                as: 'VoteUser',
+            });
+        }
     }
-  }
-  Vote.init(
-    {
-      date: {
-        type: DataTypes.DATEONLY,
-        primaryKey: true,
-      },
-      userId: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-      },
-      coinId: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-      },
-    },
-    {
-      sequelize,
-      modelName: "Vote",
-      // indexes: [{ unique: true, fields: ['userId', 'coinId', 'date'] }],
-    }
-  );
-  return Vote;
+    Vote.init(
+        {
+            user_id: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+            },
+            coin_id: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+            },
+            date: {
+                type: DataTypes.DATEONLY,
+                primaryKey: true,
+            },
+        },
+        {
+            sequelize,
+            modelName: 'Vote',
+            tableName: 'votes',
+        }
+    );
+    return Vote;
 };
