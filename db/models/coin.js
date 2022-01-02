@@ -1,31 +1,35 @@
-const { Model } = require("sequelize");
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Coin extends Model {
-    static associate(models) {}
-  }
-  Coin.init(
-    {
-      name: {
-        type: DataTypes.STRING,
-        validate: { notNull: false, notEmpty: true },
-      },
-      symbol: {
-        type: DataTypes.STRING,
-        validate: { notNull: false, notEmpty: true },
-      },
-      // contractAddress: {
-      // 	type: DataTypes.STRING,
-      // 	validate: { notNull: false, notEmpty: true },
-      // },
-      description: {
-        type: DataTypes.STRING,
-        validate: { notNull: false, notEmpty: true },
-      },
-    },
-    {
-      sequelize,
-      modelName: "Coin",
+    class Coin extends Model {
+        static associate(models) {}
     }
-  );
-  return Coin;
+    Coin.init(
+        {
+            coin_id: {
+                type: DataTypes.INTEGER,
+                autoIncrement: true,
+                primaryKey: true,
+            },
+            name: {
+                type: DataTypes.STRING,
+                validate: { notNull: false, notEmpty: true },
+                unique: true,
+            },
+            symbol: {
+                type: DataTypes.STRING,
+                validate: { notNull: false, notEmpty: true },
+                unique: true,
+            },
+            description: {
+                type: DataTypes.STRING,
+                validate: { notNull: false, notEmpty: true },
+            },
+        },
+        {
+            sequelize,
+            tableName: 'coins',
+            modelName: 'Coin',
+        }
+    );
+    return Coin;
 };
