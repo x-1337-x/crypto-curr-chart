@@ -33,7 +33,7 @@ const jwtOptions = {
 //   ],
 //   attributes: {
 //     include: [
-//       [DB.sequelize.fn("COUNT", DB.sequelize.col("VoteUser.id")), "votes"],
+//       [DB.sequelize.fn("COUNT", DB.sequelize.col("VoteUser.user_id")), "votes"],
 //     ],
 //   },
 // });
@@ -144,7 +144,7 @@ app.post('/login', async (req, res) => {
                 user.password
             );
             if (match) {
-                const payload = { userId: user.id };
+                const payload = { user_id: user.user_id };
 
                 const token = jwt.sign(
                     payload,
@@ -174,7 +174,7 @@ app.post('/validateToken', (req, res) => {
             return res.status(400).json({ err: err.message });
         }
 
-        const payload = { userId: decoded.userId };
+        const payload = { user_id: decoded.user_id };
 
         const token = jwt.sign(payload, req.app.get('secret'), jwtOptions);
 
@@ -191,14 +191,14 @@ const checkAuth = (req, res, next) => {
         if (err) {
             return res.status(403).json({ err: err.message });
         } else {
-            res.locals.userId = decoded.userId;
+            res.locals.user_id = decoded.user_id;
             next();
         }
     });
 };
 
 app.use('/protected', checkAuth, (req, res) => {
-    res.send(`Protected route data ${res.locals.userId}`);
+    res.send(`Protected route data ${res.locals.user_id}`);
 });
 
 app.post('/api/coins', async (req, res) => {
@@ -261,7 +261,7 @@ app.put('/api/coins/:id', async (req, res) => {
     try {
         await DB.Coin.update(req.body, {
             where: {
-                id: req.params.id,
+                coin_id: req.params.id,
             },
         });
         res.end();
@@ -277,7 +277,7 @@ app.delete('/api/coins/:id', async (req, res) => {
     try {
         await DB.Coin.destroy({
             where: {
-                id: req.params.id,
+                coin_id: req.params.id,
             },
         });
         res.end();
@@ -305,16 +305,16 @@ app.get('/api/watchlist', checkAuth, async (req, res) => {
     try {
         let watchlist = await DB.sequelize.models.Watchlist.findAll({
             where: {
-                userId: res.locals.userId,
+                user_id: res.locals.user_id,
             },
             raw: true,
         });
         let coinIds = watchlist.map((el) => {
-            return el.coinId;
+            return el.coin_id;
         });
         let coins = await DB.sequelize.models.Coin.findAll({
             where: {
-                id: {
+                coin_id: {
                     [DB.Sequelize.Op.in]: coinIds,
                 },
             },
@@ -330,7 +330,7 @@ app.get('/api/watchlist', checkAuth, async (req, res) => {
 
 app.post('/api/watchlist/:coinId', checkAuth, async (req, res) => {
     try {
-        let entry = { userId: res.locals.userId, coinId: req.params.coinId };
+        let entry = { user_id: res.locals.user_id, coin_id: req.params.coinId };
         await DB.sequelize.models.Watchlist.create(entry);
         res.send('The coin has been added to the watchlist');
     } catch (error) {
@@ -343,7 +343,7 @@ app.post('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 app.delete('/api/watchlist/:coinId', checkAuth, async (req, res) => {
     try {
         await DB.sequelize.models.Watchlist.destroy({
-            where: { coinId: req.params.coinId, userId: res.locals.userId },
+            where: { coin_id: req.params.coinId, user_id: res.locals.user_id },
         });
         res.send('The coin has been removed from the watchlist');
     } catch (error) {
@@ -356,7 +356,7 @@ app.delete('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 app.get('/api/votes', checkAuth, async (req, res) => {
     try {
         let votes = await DB.sequelize.models.Vote.findAll({
-            userId: res.locals.userId,
+            user_id: res.locals.user_id,
         });
         res.json(votes);
     } catch (error) {
@@ -369,8 +369,8 @@ app.get('/api/votes', checkAuth, async (req, res) => {
 app.post('/api/votes/:coinId', checkAuth, async (req, res) => {
     try {
         let vote = await DB.sequelize.models.Vote.create({
-            userId: res.locals.userId,
-            coinId: req.params.coinId,
+            user_id: res.locals.user_id,
+            coin_id: req.params.coinId,
             date: new Date().toDateString(),
         });
         res.json(vote);

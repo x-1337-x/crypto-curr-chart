@@ -1,51 +1,53 @@
 {
-	"name": "crypto-curr-chart",
-	"version": "1.0.0",
-	"description": "a coin chart utilizing coingecko API",
-	"main": "index.js",
-	"scripts": {
-		"test": "test",
-		"start": "nodemon index.js",
-		"start:client": "npx parcel serve ./client/src/index.html"
-	},
-	"author": "x-1337-x",
-	"license": "ISC",
-	"dependencies": {
-		"@types/react": "^17.0.38",
-		"@types/react-dom": "^17.0.11",
-		"@types/react-router": "^5.1.17",
-		"@types/react-router-dom": "^5.3.2",
-		"bcrypt": "^5.0.1",
-		"cors": "^2.8.5",
-		"env": "^0.0.2",
-		"express": "^4.17.2",
-		"immer": "^9.0.7",
-		"jsonwebtoken": "^8.5.1",
-		"nodemon": "^2.0.15",
-		"pg": "^8.7.1",
-		"pg-hstore": "^2.3.4",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
-		"react-router": "^6.2.1",
-		"react-router-dom": "^6.2.1",
-		"sequelize": "^7.0.0-alpha.2",
-		"use-immer": "^0.6.0"
-	},
-	"devDependencies": {
-		"@types/sequelize": "^4.28.11",
-		"parcel": "^2.0.1",
-		"sequelize-cli": "^6.3.0",
-		"typescript": "^4.5.4"
-	},
-	"nodemonConfig": {
-		"ignore": [
-			"client/*",
-			"dist/*"
-		]
-	},
-	"prettier": {
-		"trailingComma": "es5",
-		"tabWidth": 4,
-		"singleQuote": true
-	}
+    "name": "crypto-curr-chart",
+    "version": "1.0.0",
+    "description": "a coin chart utilizing coingecko API",
+    "main": "index.js",
+    "scripts": {
+        "test": "test",
+        "start": "nodemon index.js",
+        "start:client": "npx parcel serve ./client/src/index.html",
+        "apply-migrations": "npx sequelize-cli db:migrate",
+        "kill-all-migrations": "npx sequelize-cli db:migrate:undo:all"
+    },
+    "author": "x-1337-x",
+    "license": "ISC",
+    "dependencies": {
+        "@types/react": "^17.0.38",
+        "@types/react-dom": "^17.0.11",
+        "@types/react-router": "^5.1.17",
+        "@types/react-router-dom": "^5.3.2",
+        "bcrypt": "^5.0.1",
+        "cors": "^2.8.5",
+        "env": "^0.0.2",
+        "express": "^4.17.2",
+        "immer": "^9.0.7",
+        "jsonwebtoken": "^8.5.1",
+        "nodemon": "^2.0.15",
+        "pg": "^8.7.1",
+        "pg-hstore": "^2.3.4",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "react-router": "^6.2.1",
+        "react-router-dom": "^6.2.1",
+        "sequelize": "^7.0.0-alpha.2",
+        "use-immer": "^0.6.0"
+    },
+    "devDependencies": {
+        "@types/sequelize": "^4.28.11",
+        "parcel": "^2.0.1",
+        "sequelize-cli": "^6.3.0",
+        "typescript": "^4.5.4"
+    },
+    "nodemonConfig": {
+        "ignore": [
+            "client/*",
+            "dist/*"
+        ]
+    },
+    "prettier": {
+        "trailingComma": "es5",
+        "tabWidth": 4,
+        "singleQuote": true
+    }
 }

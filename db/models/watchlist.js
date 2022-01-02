@@ -37,6 +37,7 @@ module.exports = (sequelize, DataTypes) => {
             sequelize,
             tableName: 'watchlists',
             modelName: 'Watchlist',
+            timestamps: false,
         }
     );
     return Watchlist;
