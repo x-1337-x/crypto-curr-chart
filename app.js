@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken');
 const DB = require('./db/models');
 const { QueryTypes } = require('sequelize');
 
-const PORT = 3000;
+const { JWT_OPTIONS } = require('./constants');
+const checkAuth = require('./utils/checkAuth');
 
 const app = express();
 
@@ -15,9 +16,7 @@ app.use(express.json());
 
 app.set('secret', 'biliberda');
 
-const jwtOptions = {
-    expiresIn: '6h',
-};
+app.set('db', DB);
 
 // DB.sequelize.sync({ force: false }).then(async () => {
 // DONT DELETE ME PLEASE
@@ -39,9 +38,6 @@ const jwtOptions = {
 //   },
 // });
 
-app.listen(PORT, () => {
-    console.log(`The app is listening at http://localhost:${PORT}`);
-});
 // });
 
 app.post('/register', async (req, res) => {
@@ -167,7 +163,7 @@ app.post('/login', async (req, res) => {
                 const token = jwt.sign(
                     payload,
                     req.app.get('secret'),
-                    jwtOptions
+                    JWT_OPTIONS
                 );
 
                 res.json({ token });
@@ -194,26 +190,11 @@ app.post('/validateToken', (req, res) => {
 
         const payload = { user_id: decoded.user_id };
 
-        const token = jwt.sign(payload, req.app.get('secret'), jwtOptions);
+        const token = jwt.sign(payload, req.app.get('secret'), JWT_OPTIONS);
 
         res.json({ token });
     });
 });
-
-const checkAuth = (req, res, next) => {
-    const token = req.body.token || req.query.token || req.headers.token;
-
-    if (!token) return res.status(403).end();
-
-    jwt.verify(token, req.app.get('secret'), (err, decoded) => {
-        if (err) {
-            return res.status(403).json({ err: err.message });
-        } else {
-            res.locals.user_id = decoded.user_id;
-            next();
-        }
-    });
-};
 
 app.use('/protected', checkAuth, (req, res) => {
     res.send(`Protected route data ${res.locals.user_id}`);
@@ -437,3 +418,5 @@ app.post('/api/votes/:coinId', checkAuth, async (req, res) => {
         return;
     }
 });
+
+module.exports = app;

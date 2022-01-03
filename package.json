@@ -4,8 +4,8 @@
     "description": "a coin chart utilizing coingecko API",
     "main": "index.js",
     "scripts": {
-        "test": "test",
-        "start": "nodemon index.js",
+        "test": "jest",
+        "start": "nodemon server.js",
         "start:client": "npx parcel serve ./client/src/index.html",
         "apply-migrations": "npx sequelize-cli db:migrate",
         "kill-all-migrations": "npx sequelize-cli db:migrate:undo:all"
@@ -34,9 +34,13 @@
         "use-immer": "^0.6.0"
     },
     "devDependencies": {
+        "@types/jest": "^27.4.0",
         "@types/sequelize": "^4.28.11",
+        "cross-env": "^7.0.3",
+        "jest": "^27.4.5",
         "parcel": "^2.0.1",
         "sequelize-cli": "^6.3.0",
+        "supertest": "^6.1.6",
         "typescript": "^4.5.4"
     },
     "nodemonConfig": {
