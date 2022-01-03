@@ -3,6 +3,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const DB = require('./db/models');
+const { QueryTypes } = require('sequelize');
 
 const PORT = 3000;
 
@@ -67,10 +68,18 @@ app.post('/register', async (req, res) => {
     }
 
     try {
-        let user = req.body;
-        user.password = await bcrypt.hash(user.password, 10);
-        let dbUser = await DB.User.create(user);
-        res.send('User created');
+        let { email, password } = req.body;
+        password = password = await bcrypt.hash(password, 10);
+        const [results, metadata] = await DB.sequelize.query(
+            `insert into users ("email", "password") values (:email, :password)`,
+            {
+                replacements: {
+                    email,
+                    password,
+                },
+            }
+        );
+        res.json({ results, metadata });
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
@@ -130,11 +139,20 @@ app.get('/login', (req, res) => {
 
 app.post('/login', async (req, res) => {
     try {
-        let user = await DB.User.findOne({
-            where: {
-                email: req.body.email,
-            },
-        });
+        // let user = await DB.User.findOne({
+        //     where: {
+        //         email: req.body.email,
+        //     },
+        // });
+        const [user] = await DB.sequelize.query(
+            `select * from users where email=:email`,
+            {
+                replacements: {
+                    email: req.body.email,
+                },
+                type: QueryTypes.SELECT,
+            }
+        );
         if (!user) {
             res.status(400).send('Wrong email or password');
             return;
@@ -203,7 +221,18 @@ app.use('/protected', checkAuth, (req, res) => {
 
 app.post('/api/coins', async (req, res) => {
     try {
-        let coin = await DB.Coin.create(req.body);
+        let { name, symbol, description } = req.body;
+        let [coin] = await DB.sequelize.query(
+            `insert into coins ("name", "symbol", "description") values (:name, :symbol, :description)`,
+            {
+                replacements: {
+                    name,
+                    symbol,
+                    description,
+                },
+                type: QueryTypes.INSERT,
+            }
+        );
         res.send(coin);
     } catch (error) {
         console.log(error);
@@ -243,7 +272,16 @@ app.get('/submit', (req, res) => {
 
 app.get('/api/coins/:id', async (req, res) => {
     try {
-        let coin = await DB.Coin.findByPk(req.params.id);
+        let id = req.params.id;
+        let [coin] = await DB.sequelize.query(
+            `select * from coins where coin_id=:id`,
+            {
+                replacements: {
+                    id,
+                },
+                type: QueryTypes.SELECT,
+            }
+        );
         if (!coin) {
             res.sendStatus(404);
             return;
@@ -259,11 +297,20 @@ app.get('/api/coins/:id', async (req, res) => {
 
 app.put('/api/coins/:id', async (req, res) => {
     try {
-        await DB.Coin.update(req.body, {
-            where: {
-                coin_id: req.params.id,
-            },
-        });
+        let id = req.params.id;
+        let { name, symbol, description } = req.body;
+        await DB.sequelize.query(
+            `update coins set name=:name, symbol=:symbol, description=:description where coin_id = :id`,
+            {
+                replacements: {
+                    name,
+                    symbol,
+                    description,
+                    id,
+                },
+                type: QueryTypes.UPDATE,
+            }
+        );
         res.end();
         return;
     } catch (error) {
@@ -275,10 +322,12 @@ app.put('/api/coins/:id', async (req, res) => {
 
 app.delete('/api/coins/:id', async (req, res) => {
     try {
-        await DB.Coin.destroy({
-            where: {
-                coin_id: req.params.id,
+        let id = req.params.id;
+        await DB.sequelize.query(`delete from coins where coin_id=:id`, {
+            replacements: {
+                id,
             },
+            type: QueryTypes.DELETE,
         });
         res.end();
         return;
@@ -291,7 +340,7 @@ app.delete('/api/coins/:id', async (req, res) => {
 
 app.get('/api/coins', async (req, res) => {
     try {
-        const coins = await DB.Coin.findAll();
+        const [coins] = await DB.sequelize.query(`select * from coins`);
         res.json(coins);
         return;
     } catch (error) {
@@ -303,22 +352,30 @@ app.get('/api/coins', async (req, res) => {
 
 app.get('/api/watchlist', checkAuth, async (req, res) => {
     try {
-        let watchlist = await DB.sequelize.models.Watchlist.findAll({
-            where: {
-                user_id: res.locals.user_id,
-            },
-            raw: true,
-        });
-        let coinIds = watchlist.map((el) => {
-            return el.coin_id;
-        });
-        let coins = await DB.sequelize.models.Coin.findAll({
-            where: {
-                coin_id: {
-                    [DB.Sequelize.Op.in]: coinIds,
-                },
-            },
-        });
+        // let watchlist = await DB.sequelize.models.Watchlist.findAll({
+        //     where: {
+        //         user_id: res.locals.user_id,
+        //     },
+        //     raw: true,
+        // });
+        // let coinIds = watchlist.map((el) => {
+        //     return el.coin_id;
+        // });
+        // let coins = await DB.sequelize.models.Coin.findAll({
+        //     where: {
+        //         coin_id: {
+        //             [DB.Sequelize.Op.in]: coinIds,
+        //         },
+        //     },
+        // });
+        let id = res.locals.user_id;
+        let coins = await DB.sequelize.query(
+            `select * from coins where coin_id in (select coin_id from watchlists where user_id=:id)`,
+            {
+                replacements: { id },
+                type: QueryTypes.SELECT,
+            }
+        );
         res.json(coins);
         return;
     } catch (error) {
