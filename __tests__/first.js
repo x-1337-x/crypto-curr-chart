@@ -1,6 +1,14 @@
 const checkAuth = require('../utils/checkAuth');
-const { JWT_OPTIONS } = require('../constants');
-const jwt = require('jsonwebtoken');
+const request = require('supertest');
+const app = require('../app');
+
+const modelMock = {
+    findByPk: jest.fn().mockReturnValue({}),
+};
+
+const dbMock = {
+    User: modelMock,
+};
 
 const createRequestMock = () => {
     const req = {
@@ -9,6 +17,14 @@ const createRequestMock = () => {
         headers: {},
         app: {
             get: jest.fn().mockImplementation(function (key) {
+                if (key === 'db') {
+                    return dbMock;
+                }
+
+                if (app.get(key)) {
+                    return app.get(key);
+                }
+
                 return `app-get-${key}`;
             }),
         },
@@ -32,15 +48,34 @@ const createResponseMock = () => {
     return res;
 };
 
-const generateToken = (req) => {
-    const payload = { user_id: 1 };
+const doneFunction = jest.fn().mockImplementation(() => {
+    console.log('DONE DONE DONE');
+});
 
-    const token = jwt.sign(payload, req.app.get('secret'), JWT_OPTIONS);
+let token = null;
+beforeAll(async () => {
+    await request(app).post('/register').send({
+        email: 'testuser@test',
+        password: 'test',
+        repeatPassword: 'test',
+    });
+    const response = await request(app)
+        .post('/login')
+        .send({ email: 'testuser@test', password: 'test' });
 
-    return token;
-};
+    token = response.body.token;
+});
 
-const doneFunction = jest.fn();
+afterAll(async () => {
+    await app
+        .get('db')
+        .sequelize.query("delete from users where email = 'testuser@test'");
+    await app.get('db').sequelize.close();
+});
+
+beforeEach(() => {
+    doneFunction.mockClear();
+});
 
 describe('checkAuth middleware', function () {
     test('request without token', function () {
@@ -65,13 +100,13 @@ describe('checkAuth middleware', function () {
         expect(doneFunction).not.toBeCalled();
     });
 
-    test('request with token in body', function () {
+    test('request with token in body', async function () {
         const req = createRequestMock();
         const res = createResponseMock();
 
-        req.body.token = generateToken(req);
+        req.body.token = token;
 
-        checkAuth(req, res, doneFunction);
+        await checkAuth(req, res, doneFunction);
 
         expect(res.statusCode).toBe(200);
         expect(doneFunction).toBeCalled();

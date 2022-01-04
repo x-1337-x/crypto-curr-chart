@@ -57,25 +57,33 @@ app.post('/register', async (req, res) => {
     // 	res.status(500).end();
     // 	return;
     // }
-    let { password, repeatPassword } = req.body;
+    let { email, password, repeatPassword } = req.body;
+
+    if (!email || !password || !repeatPassword) {
+        res.status(400).send(
+            'Email, password, repeatedPassword are required fields'
+        );
+        return;
+    }
+
     if (password !== repeatPassword) {
         res.status(400).send('Password does not match Repeat password');
         return;
     }
 
     try {
-        let { email, password } = req.body;
         password = password = await bcrypt.hash(password, 10);
-        const [results, metadata] = await DB.sequelize.query(
-            `insert into users ("email", "password") values (:email, :password)`,
+        const [users] = await DB.sequelize.query(
+            `insert into users ("email", "password") values (:email, :password) RETURNING user_id, email, password`,
             {
                 replacements: {
                     email,
                     password,
                 },
+                type: QueryTypes.INSERT,
             }
         );
-        res.json({ results, metadata });
+        res.json({ user: users[0] });
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
