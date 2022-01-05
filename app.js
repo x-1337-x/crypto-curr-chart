@@ -18,8 +18,8 @@ app.set('secret', 'biliberda');
 
 app.set('db', DB);
 
-// DB.sequelize.sync({ force: false }).then(async () => {
 // DONT DELETE ME PLEASE
+// DB.sequelize.sync({ force: false }).then(async () => {
 // const result = await DB.sequelize.models.Coin.findAll({
 //   raw: true,
 //   group: ["Coin.id"],
@@ -41,22 +41,6 @@ app.set('db', DB);
 // });
 
 app.post('/register', async (req, res) => {
-    // try {
-    // 	let users = await DB.User.findAll({
-    // 		where: {
-    // 			email: req.body.email,
-    // 		},
-    // 	});
-
-    // 	if (users.length > 0) {
-    // 		res.status(400).send('Registration failure');
-    // 		return;
-    // 	}
-    // } catch (error) {
-    // 	console.log(error);
-    // 	res.status(500).end();
-    // 	return;
-    // }
     let { email, password, repeatPassword } = req.body;
 
     if (!email || !password || !repeatPassword) {
@@ -74,7 +58,7 @@ app.post('/register', async (req, res) => {
     try {
         password = password = await bcrypt.hash(password, 10);
         const [users] = await DB.sequelize.query(
-            `insert into users ("email", "password") values (:email, :password) RETURNING user_id, email, password`,
+            `insert into users ("email", "password") values (:email, :password) returning user_id, email, password`,
             {
                 replacements: {
                     email,
@@ -377,8 +361,21 @@ app.get('/api/watchlist', checkAuth, async (req, res) => {
 app.post('/api/watchlist/:coinId', checkAuth, async (req, res) => {
     try {
         let entry = { user_id: res.locals.user_id, coin_id: req.params.coinId };
-        await DB.sequelize.models.Watchlist.create(entry);
-        res.send('The coin has been added to the watchlist');
+        let [queryReturn] = await DB.sequelize.query(
+            `insert into watchlists ("user_id", "coin_id") values (:user_id, :coin_id) RETURNING user_id, coin_id`,
+            {
+                replacements: {
+                    user_id: entry.user_id,
+                    coin_id: entry.coin_id,
+                },
+                type: QueryTypes.INSERT,
+            }
+        );
+        console.log(queryReturn);
+        res.json({
+            msg: 'The coin has been added to the watchlist',
+            coin: queryReturn[0],
+        });
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
@@ -388,10 +385,19 @@ app.post('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 
 app.delete('/api/watchlist/:coinId', checkAuth, async (req, res) => {
     try {
-        await DB.sequelize.models.Watchlist.destroy({
-            where: { coin_id: req.params.coinId, user_id: res.locals.user_id },
+        await DB.sequelize.query(
+            `delete from watchlists where coin_id=:coin_id and user_id=:user_id RETURNING user_id, coin_id`,
+            {
+                replacements: {
+                    coin_id: req.params.coinId,
+                    user_id: res.locals.user_id,
+                },
+                type: QueryTypes.DELETE,
+            }
+        );
+        res.json({
+            msg: 'The coin has been removed from the watchlist',
         });
-        res.send('The coin has been removed from the watchlist');
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
@@ -401,9 +407,12 @@ app.delete('/api/watchlist/:coinId', checkAuth, async (req, res) => {
 
 app.get('/api/votes', checkAuth, async (req, res) => {
     try {
-        let votes = await DB.sequelize.models.Vote.findAll({
-            user_id: res.locals.user_id,
-        });
+        let [votes, metadata] = await DB.sequelize.query(
+            `select * from votes where user_id=:user_id`,
+            {
+                replacements: { user_id: res.locals.user_id },
+            }
+        );
         res.json(votes);
     } catch (error) {
         console.log(error);
@@ -414,12 +423,18 @@ app.get('/api/votes', checkAuth, async (req, res) => {
 
 app.post('/api/votes/:coinId', checkAuth, async (req, res) => {
     try {
-        let vote = await DB.sequelize.models.Vote.create({
-            user_id: res.locals.user_id,
-            coin_id: req.params.coinId,
-            date: new Date().toDateString(),
-        });
-        res.json(vote);
+        let [votes] = await DB.sequelize.query(
+            `insert into votes ("user_id", "coin_id", "date") values (:user_id, :coin_id, :date) returning user_id, coin_id, date`,
+            {
+                replacements: {
+                    user_id: res.locals.user_id,
+                    coin_id: req.params.coinId,
+                    date: new Date().toDateString(),
+                },
+                type: QueryTypes.INSERT,
+            }
+        );
+        res.json({ msg: 'The vote has been added', vote: votes[0] });
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
