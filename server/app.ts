@@ -1,12 +1,15 @@
-const express = require('express');
-const cors = require('cors');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const DB = require('./db/models');
-const { QueryTypes } = require('sequelize');
+import express from 'express';
+import cors from 'cors';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import DB from './db/models';
+import { QueryTypes } from 'sequelize';
 
-const { JWT_OPTIONS } = require('./constants');
-const checkAuth = require('./utils/checkAuth');
+import { JWT_OPTIONS } from './constants';
+import checkAuth from './utils/checkAuth';
+import { setupDB } from './db_typeorm';
+import { getConnection } from 'typeorm';
+import type { AuthTokenPayload } from './types';
 
 const app = express();
 
@@ -17,6 +20,12 @@ app.use(express.json());
 app.set('secret', 'biliberda');
 
 app.set('db', DB);
+
+(async () => {
+    await setupDB();
+})();
+
+const DB2 = getConnection();
 
 // DONT DELETE ME PLEASE
 // DB.sequelize.sync({ force: false }).then(async () => {
@@ -56,18 +65,14 @@ app.post('/register', async (req, res) => {
     }
 
     try {
-        password = password = await bcrypt.hash(password, 10);
-        const [users] = await DB.sequelize.query(
-            `insert into users ("email", "password") values (:email, :password) returning user_id, email, password`,
-            {
-                replacements: {
-                    email,
-                    password,
-                },
-                type: QueryTypes.INSERT,
-            }
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await DB2.query(
+            `insert into users ("email", "password") values ($1, $2) returning user_id, email, password`,
+            [email, hashedPassword]
         );
-        res.json({ user: users[0] });
+
+        res.end();
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
@@ -150,7 +155,7 @@ app.post('/login', async (req, res) => {
                 user.password
             );
             if (match) {
-                const payload = { user_id: user.user_id };
+                const payload: AuthTokenPayload = { user_id: user.user_id };
 
                 const token = jwt.sign(
                     payload,
@@ -175,12 +180,12 @@ app.post('/login', async (req, res) => {
 app.post('/validateToken', (req, res) => {
     const token = req.body.token || req.query.token || req.headers.token;
 
-    jwt.verify(token, req.app.get('secret'), (err, decoded) => {
+    jwt.verify(token, req.app.get('secret'), (err: any, decoded: any) => {
         if (err) {
             return res.status(400).json({ err: err.message });
         }
 
-        const payload = { user_id: decoded.user_id };
+        const payload: AuthTokenPayload = { user_id: decoded.user_id };
 
         const token = jwt.sign(payload, req.app.get('secret'), JWT_OPTIONS);
 
@@ -353,7 +358,7 @@ app.get('/api/watchlist', checkAuth, async (req, res) => {
         return;
     } catch (error) {
         console.log(error);
-        sendStatus(500);
+        res.sendStatus(500);
         return;
     }
 });
@@ -442,4 +447,4 @@ app.post('/api/votes/:coinId', checkAuth, async (req, res) => {
     }
 });
 
-module.exports = app;
+export default app;

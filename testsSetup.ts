@@ -1,4 +1,4 @@
-const app = require('./app');
+import app from './server/app';
 
 module.exports = async () => {
     await app.get('db').sequelize.sync({ force: true });

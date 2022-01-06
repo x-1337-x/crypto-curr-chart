@@ -54,10 +54,10 @@ module.exports = {
     // forceCoverageMatch: [],
 
     // A path to a module which exports an async function that is triggered once before all test suites
-    globalSetup: './testsSetup',
+    globalSetup: './testsSetup.ts',
 
     // A path to a module which exports an async function that is triggered once after all test suites
-    globalTeardown: './testsTeardown',
+    globalTeardown: './testsTeardown.ts',
 
     // A set of global variables that need to be available in all test environments
     // globals: {},
@@ -71,14 +71,14 @@ module.exports = {
     // ],
 
     // An array of file extensions your modules use
-    // moduleFileExtensions: [
-    //   "js",
-    //   "jsx",
-    //   "ts",
-    //   "tsx",
-    //   "json",
-    //   "node"
-    // ],
+    moduleFileExtensions: [
+        'js',
+        //   "jsx",
+        'ts',
+        //   "tsx",
+        //   "json",
+        //   "node"
+    ],
 
     // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
     // moduleNameMapper: {},
@@ -172,7 +172,7 @@ module.exports = {
     // timers: "real",
 
     // A map from regular expressions to paths to transformers
-    transform: {},
+    transform: { '\\.ts$': ['ts-jest'] },
 
     // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
     // transformIgnorePatterns: [

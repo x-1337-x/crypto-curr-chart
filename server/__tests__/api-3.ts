@@ -1,7 +1,7 @@
-const request = require('supertest');
-const app = require('../app');
+import request from 'supertest';
+import app from '../app';
 
-let token = null;
+let token: string | null = null;
 beforeAll(async () => {
     await request(app).post('/register').send({
         email: 'testuser@test',

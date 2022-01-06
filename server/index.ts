@@ -1,6 +1,6 @@
-const app = require('./app');
+import app from './app';
 
-const { PORT } = require('./constants');
+import { PORT } from './constants';
 
 app.listen(PORT, function () {
     console.log(`app is running at http://localhost:${PORT}`);

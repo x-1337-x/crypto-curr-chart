@@ -1,6 +1,6 @@
-const checkAuth = require('../utils/checkAuth');
-const request = require('supertest');
-const app = require('../app');
+import checkAuth from '../utils/checkAuth';
+import request from 'supertest';
+import app from '../app';
 
 const modelMock = {
     findByPk: jest.fn().mockReturnValue({}),
