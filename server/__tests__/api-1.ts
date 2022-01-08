@@ -13,7 +13,7 @@ afterAll(async () => {
 });
 
 describe('API', function () {
-    test('POST /register', async function () {
+    test('POST /register with invalid input', async function () {
         const payloads = [
             {},
             { password: '123', repeatPassword: '234' },
