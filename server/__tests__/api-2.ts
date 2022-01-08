@@ -1,8 +1,15 @@
 import request from 'supertest';
 import app from '../app';
+import { setupDB } from '../db_typeorm';
+
+beforeAll(async () => {
+    const connection = await setupDB('test');
+    app.set('db2', connection);
+});
 
 afterAll(async () => {
     await app.get('db').sequelize.close();
+    await app.get('db2').close();
 });
 
 describe('API', function () {

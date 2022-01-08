@@ -1,7 +1,11 @@
 import app from './app';
 
 import { PORT } from './constants';
+import { setupDB } from './db_typeorm';
 
-app.listen(PORT, function () {
-    console.log(`app is running at http://localhost:${PORT}`);
+setupDB('app').then((connection) => {
+    app.set('db2', connection);
+    app.listen(PORT, function () {
+        console.log(`app is running at http://localhost:${PORT}`);
+    });
 });

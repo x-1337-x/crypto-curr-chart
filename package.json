@@ -2,7 +2,6 @@
     "name": "crypto-curr-chart",
     "version": "1.0.0",
     "description": "a coin chart utilizing coingecko API",
-    "main": "index.js",
     "scripts": {
         "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest",
         "build": "tsc -p ./server",
@@ -38,6 +37,9 @@
         "use-immer": "^0.6.0"
     },
     "devDependencies": {
+        "@babel/core": "^7.16.7",
+        "@babel/preset-env": "^7.16.7",
+        "@babel/preset-typescript": "^7.16.7",
         "@types/bcrypt": "^5.0.0",
         "@types/cors": "^2.8.12",
         "@types/express": "^4.17.13",
@@ -46,6 +48,7 @@
         "@types/node": "^17.0.8",
         "@types/sequelize": "^4.28.11",
         "@types/supertest": "^2.0.11",
+        "babel-jest": "^27.4.6",
         "cross-env": "^7.0.3",
         "jest": "^27.4.5",
         "parcel": "^2.0.1",

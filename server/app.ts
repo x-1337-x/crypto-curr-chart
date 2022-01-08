@@ -7,8 +7,6 @@ import { QueryTypes } from 'sequelize';
 
 import { JWT_OPTIONS } from './constants';
 import checkAuth from './utils/checkAuth';
-import { setupDB } from './db_typeorm';
-import { getConnection } from 'typeorm';
 import type { AuthTokenPayload } from './types';
 
 const app = express();
@@ -20,12 +18,6 @@ app.use(express.json());
 app.set('secret', 'biliberda');
 
 app.set('db', DB);
-
-(async () => {
-    await setupDB();
-})();
-
-const DB2 = getConnection();
 
 // DONT DELETE ME PLEASE
 // DB.sequelize.sync({ force: false }).then(async () => {
@@ -67,10 +59,12 @@ app.post('/register', async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await DB2.query(
-            `insert into users ("email", "password") values ($1, $2) returning user_id, email, password`,
-            [email, hashedPassword]
-        );
+        await app
+            .get('db2')
+            .query(
+                `insert into users ("email", "password") values ($1, $2) returning user_id, email, password`,
+                [email, hashedPassword]
+            );
 
         res.end();
     } catch (error) {

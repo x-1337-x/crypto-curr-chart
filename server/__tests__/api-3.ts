@@ -1,13 +1,13 @@
 import request from 'supertest';
+import { getConnection } from 'typeorm';
 import app from '../app';
+import { setupDB } from '../db_typeorm';
 
 let token: string | null = null;
 beforeAll(async () => {
-    await request(app).post('/register').send({
-        email: 'testuser@test',
-        password: 'test',
-        repeatPassword: 'test',
-    });
+    const connection = await setupDB('test');
+    app.set('db2', connection);
+
     const response = await request(app)
         .post('/login')
         .send({ email: 'testuser@test', password: 'test' });
@@ -16,10 +16,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    await app
-        .get('db')
-        .sequelize.query("delete from users where email = 'testuser@test'");
     await app.get('db').sequelize.close();
+    await app.get('db2').close();
 });
 
 describe('API', function () {

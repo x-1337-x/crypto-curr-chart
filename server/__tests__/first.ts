@@ -1,6 +1,9 @@
 import checkAuth from '../utils/checkAuth';
 import request from 'supertest';
 import app from '../app';
+import { Request, Response } from 'express';
+import { setupDB } from '../db_typeorm';
+import { getConnection } from 'typeorm';
 
 const modelMock = {
     findByPk: jest.fn().mockReturnValue({}),
@@ -10,8 +13,25 @@ const dbMock = {
     User: modelMock,
 };
 
-const createRequestMock = () => {
-    const req = {
+type RequestMock = {
+    body: Record<string, any>;
+    query: Record<string, any>;
+    headers: Record<string, any>;
+    app: {
+        get(key: string): any;
+    };
+};
+
+type ResponseMock = {
+    status(status: number): ResponseMock;
+    end: Function;
+    json: Function;
+    locals: Record<string, any>;
+    statusCode: number;
+};
+
+const createRequestMock = (): RequestMock => {
+    const req: RequestMock = {
         body: {},
         query: {},
         headers: {},
@@ -33,8 +53,8 @@ const createRequestMock = () => {
     return req;
 };
 
-const createResponseMock = () => {
-    const res = {
+const createResponseMock = (): ResponseMock => {
+    const res: ResponseMock = {
         status: jest.fn().mockImplementation(function (status) {
             res.statusCode = status;
             return res;
@@ -48,17 +68,12 @@ const createResponseMock = () => {
     return res;
 };
 
-const doneFunction = jest.fn().mockImplementation(() => {
-    console.log('DONE DONE DONE');
-});
+const doneFunction = jest.fn();
 
-let token = null;
+let token: string | null = null;
 beforeAll(async () => {
-    await request(app).post('/register').send({
-        email: 'testuser@test',
-        password: 'test',
-        repeatPassword: 'test',
-    });
+    const connection = await setupDB('test');
+    app.set('db2', connection);
     const response = await request(app)
         .post('/login')
         .send({ email: 'testuser@test', password: 'test' });
@@ -67,10 +82,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    await app
-        .get('db')
-        .sequelize.query("delete from users where email = 'testuser@test'");
     await app.get('db').sequelize.close();
+    await app.get('db2').close();
 });
 
 beforeEach(() => {
@@ -82,7 +95,7 @@ describe('checkAuth middleware', function () {
         const req = createRequestMock();
         const res = createResponseMock();
 
-        checkAuth(req, res, doneFunction);
+        checkAuth(req as Request, res as Response, doneFunction);
 
         expect(res.statusCode).toBe(403);
         expect(doneFunction).not.toBeCalled();
@@ -94,7 +107,7 @@ describe('checkAuth middleware', function () {
 
         req.body.token = '12345678';
 
-        checkAuth(req, res, doneFunction);
+        checkAuth(req as Request, res as Response, doneFunction);
 
         expect(res.statusCode).toBe(403);
         expect(doneFunction).not.toBeCalled();
@@ -106,7 +119,7 @@ describe('checkAuth middleware', function () {
 
         req.body.token = token;
 
-        await checkAuth(req, res, doneFunction);
+        await checkAuth(req as Request, res as Response, doneFunction);
 
         expect(res.statusCode).toBe(200);
         expect(doneFunction).toBeCalled();

@@ -7,14 +7,6 @@ export const PORT = 3000;
 export const DB_SETTINGS = {
     development: {
         type: 'postgres',
-        entities: ['src/entity/**/*.ts'],
-        migrations: ['src/migration/**/*.ts'],
-        subscribers: ['src/subscriber/**/*.ts'],
-        cli: {
-            entitiesDir: 'src/entity',
-            migrationsDir: 'src/migration',
-            subscribersDir: 'src/subscriber',
-        },
         port: 5432,
         username: 'nlxtikqohobtaw',
         password:
@@ -32,21 +24,14 @@ export const DB_SETTINGS = {
     },
     test: {
         type: 'postgres',
-        entities: ['src/entity/**/*.ts'],
-        migrations: ['src/migration/**/*.ts'],
-        subscribers: ['src/subscriber/**/*.ts'],
-        cli: {
-            entitiesDir: 'src/entity',
-            migrationsDir: 'src/migration',
-            subscribersDir: 'src/subscriber',
-        },
         port: 5432,
         username: 'sjffjihmzhgsse',
         password:
             '09c730c2d6321324499e4534aba4442ccb569958112a70d43c14d92c8eed5995',
         database: 'da2dk46aq6p2oi',
         host: 'ec2-54-195-141-170.eu-west-1.compute.amazonaws.com',
-        synchronize: true,
+        synchronize: false,
+        dropSchema: false,
         logging: false,
         ssl: true,
         extra: {
