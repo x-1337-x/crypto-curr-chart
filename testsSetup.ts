@@ -6,7 +6,7 @@ export default async () => {
     const connection = await setupDB('global_test');
     await connection.synchronize(true);
 
-    app.set('db2', connection);
+    app.set('db', connection);
 
     await request(app).post('/register').send({
         email: 'testuser@test',

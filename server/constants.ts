@@ -1,10 +1,12 @@
+import { ConnectionOptions } from 'typeorm';
+
 export const JWT_OPTIONS = {
     expiresIn: '6h',
 };
 
 export const PORT = 3000;
 
-export const DB_SETTINGS = {
+export const DB_SETTINGS: Record<string, ConnectionOptions> = {
     development: {
         type: 'postgres',
         port: 5432,
@@ -14,6 +16,7 @@ export const DB_SETTINGS = {
         database: 'dcgfiajid84r98',
         host: 'ec2-34-247-118-233.eu-west-1.compute.amazonaws.com',
         synchronize: true,
+        dropSchema: false,
         logging: true,
         ssl: true,
         extra: {

@@ -3,14 +3,10 @@ import request from 'supertest';
 import app from '../app';
 import { Request, Response } from 'express';
 import { setupDB } from '../db_typeorm';
-import { getConnection } from 'typeorm';
-
-const modelMock = {
-    findByPk: jest.fn().mockReturnValue({}),
-};
+import { getDB } from '../utils/getDB';
 
 const dbMock = {
-    User: modelMock,
+    query: jest.fn().mockReturnValue([{}]),
 };
 
 type RequestMock = {
@@ -73,7 +69,9 @@ const doneFunction = jest.fn();
 let token: string | null = null;
 beforeAll(async () => {
     const connection = await setupDB('test');
-    app.set('db2', connection);
+
+    app.set('db', connection);
+
     const response = await request(app)
         .post('/login')
         .send({ email: 'testuser@test', password: 'test' });
@@ -82,8 +80,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    await app.get('db').sequelize.close();
-    await app.get('db2').close();
+    await getDB(app).close();
 });
 
 beforeEach(() => {
@@ -113,11 +110,13 @@ describe('checkAuth middleware', function () {
         expect(doneFunction).not.toBeCalled();
     });
 
-    test('request with token in body', async function () {
+    test.only('request with token in body', async function () {
         const req = createRequestMock();
         const res = createResponseMock();
 
         req.body.token = token;
+
+        console.log({ token });
 
         await checkAuth(req as Request, res as Response, doneFunction);
 

@@ -10,7 +10,7 @@ export type Vote = {
 
 @Entity({ name: 'votes' })
 export class VoteEntity extends BaseEntity {
-    @Column({ primary: true })
+    @Column({ primary: true, type: 'date' })
     date!: string;
 
     @Column({ primary: true })

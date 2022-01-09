@@ -1,15 +1,16 @@
 import request from 'supertest';
 import app from '../app';
 import { setupDB } from '../db_typeorm';
+import { getDB } from '../utils/getDB';
 
 beforeAll(async () => {
     const connection = await setupDB('test');
-    app.set('db2', connection);
+
+    app.set('db', connection);
 });
 
 afterAll(async () => {
-    await app.get('db').sequelize.close();
-    await app.get('db2').close();
+    await getDB(app).close();
 });
 
 describe('API', function () {

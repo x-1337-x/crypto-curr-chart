@@ -14,7 +14,7 @@ export const setupDB = async (name: string = 'app'): Promise<Connection> => {
     const connection = await createConnection({
         name,
         entities,
-        ...(DB_SETTINGS[env] as ConnectionOptions),
+        ...DB_SETTINGS[env],
     });
 
     return connection;

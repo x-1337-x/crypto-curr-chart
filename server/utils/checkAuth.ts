@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import type { AuthTokenPayload } from '../types';
+import { getDB } from './getDB';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
     const token = req.body.token || req.query.token || req.headers.token;
@@ -13,7 +14,10 @@ export default async (req: Request, res: Response, next: NextFunction) => {
             req.app.get('secret')
         )) as AuthTokenPayload;
 
-        const user = await req.app.get('db').User.findByPk(decoded.user_id);
+        const [user] = await getDB(req.app).query(
+            'select * from users where user_id = $1',
+            [decoded.user_id]
+        );
 
         if (!user) {
             return res.status(403).end();
@@ -23,6 +27,8 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
         next();
     } catch (err: any) {
+        console.log(err);
+
         return res.status(403).json({ err: err.message });
     }
 };
