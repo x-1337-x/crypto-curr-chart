@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -16,22 +16,22 @@ app.use(express.json());
 
 app.set('secret', 'biliberda');
 
-app.post('/register', async (req, res) => {
-    let { email, password, repeatPassword } = req.body;
-
-    if (!email || !password || !repeatPassword) {
-        res.status(400).send(
-            'Email, password, repeatedPassword are required fields'
-        );
-        return;
-    }
-
-    if (password !== repeatPassword) {
-        res.status(400).send('Password does not match Repeat password');
-        return;
-    }
-
+app.post('/register', async (req, res, next) => {
     try {
+        let { email, password, repeatPassword } = req.body;
+
+        if (!email || !password || !repeatPassword) {
+            res.status(400).send(
+                'Email, password, repeatedPassword are required fields'
+            );
+            return;
+        }
+
+        if (password !== repeatPassword) {
+            res.status(400).send('Password does not match Repeat password');
+            return;
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         await getDB(app).query(
@@ -41,13 +41,11 @@ app.post('/register', async (req, res) => {
 
         res.end();
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        return next(error);
     }
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', async (req, res, next) => {
     try {
         const [user] = await getDB(app).query(
             `select * from users where email = $1`,
@@ -79,9 +77,7 @@ app.post('/login', async (req, res) => {
             }
         }
     } catch (error) {
-        console.log(error);
-        res.status(500);
-        return;
+        return next(error);
     }
 });
 
@@ -92,19 +88,17 @@ app.post('/validateToken', checkAuth, (req, res) => {
     res.json({ token });
 });
 
-app.get('/api/coins', async (req, res) => {
+app.get('/api/coins', async (req, res, next) => {
     try {
         const coins = await getDB(app).query(`select * from coins`);
         res.json(coins);
         return;
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        next(error);
     }
 });
 
-app.post('/api/coins', async (req, res) => {
+app.post('/api/coins', async (req, res, next) => {
     try {
         let { name, symbol, description } = req.body;
         let [coin] = await getDB(app).query(
@@ -113,13 +107,11 @@ app.post('/api/coins', async (req, res) => {
         );
         res.send(coin);
     } catch (error) {
-        console.log(error);
-        res.status(500).end();
-        return;
+        return next(error);
     }
 });
 
-app.get('/api/coins/:id', async (req, res) => {
+app.get('/api/coins/:id', async (req, res, next) => {
     try {
         let id = req.params.id;
         let [coin] = await getDB(app).query(
@@ -133,13 +125,11 @@ app.get('/api/coins/:id', async (req, res) => {
         res.json(coin);
         return;
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        return next(error);
     }
 });
 
-app.put('/api/coins/:id', async (req, res) => {
+app.put('/api/coins/:id', async (req, res, next) => {
     try {
         let id = req.params.id;
         let { name, symbol, description } = req.body;
@@ -150,26 +140,22 @@ app.put('/api/coins/:id', async (req, res) => {
         res.end();
         return;
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        return next(error);
     }
 });
 
-app.delete('/api/coins/:id', async (req, res) => {
+app.delete('/api/coins/:id', async (req, res, next) => {
     try {
         let id = req.params.id;
         await getDB(app).query(`delete from coins where coin_id = $1`, [id]);
         res.end();
         return;
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        return next(error);
     }
 });
 
-app.get('/api/watchlist', checkAuth, async (req, res) => {
+app.get('/api/watchlist', checkAuth, async (req, res, next) => {
     try {
         let id = res.locals.user_id;
         let coins = await getDB(app).query(
@@ -179,13 +165,11 @@ app.get('/api/watchlist', checkAuth, async (req, res) => {
         res.json(coins);
         return;
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        return next(error);
     }
 });
 
-app.post('/api/watchlist/:coinId', checkAuth, async (req, res) => {
+app.post('/api/watchlist/:coinId', checkAuth, async (req, res, next) => {
     try {
         let result = await getDB(app).query(
             `insert into watchlists ("user_id", "coin_id") values ($1, $2) RETURNING user_id, coin_id`,
@@ -196,13 +180,11 @@ app.post('/api/watchlist/:coinId', checkAuth, async (req, res) => {
             coin: result[0],
         });
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        return next(error);
     }
 });
 
-app.delete('/api/watchlist/:coinId', checkAuth, async (req, res) => {
+app.delete('/api/watchlist/:coinId', checkAuth, async (req, res, next) => {
     try {
         await getDB(app).query(
             `delete from watchlists where coin_id = $1 and user_id = $2 RETURNING user_id, coin_id`,
@@ -212,13 +194,11 @@ app.delete('/api/watchlist/:coinId', checkAuth, async (req, res) => {
             msg: 'The coin has been removed from the watchlist',
         });
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        return next(error);
     }
 });
 
-app.get('/api/votes', checkAuth, async (req, res) => {
+app.get('/api/votes', checkAuth, async (req, res, next) => {
     try {
         let votes = await getDB(app).query(
             `select * from votes where user_id = $1`,
@@ -226,13 +206,11 @@ app.get('/api/votes', checkAuth, async (req, res) => {
         );
         res.json(votes);
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        return next(error);
     }
 });
 
-app.post('/api/votes/:coinId', checkAuth, async (req, res) => {
+app.post('/api/votes/:coinId', checkAuth, async (req, res, next) => {
     try {
         let result = await getDB(app).query(
             `insert into votes ("user_id", "coin_id", "date") values ($1, $2, $3) returning user_id, coin_id, date`,
@@ -240,10 +218,23 @@ app.post('/api/votes/:coinId', checkAuth, async (req, res) => {
         );
         res.json({ msg: 'The vote has been added', vote: result[0] });
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-        return;
+        return next(error);
     }
+});
+
+app.use(function errorHandler(
+    err: any,
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    console.error(err);
+
+    if (res.headersSent) {
+        return next(err);
+    }
+
+    res.status(500).send('Something broke!');
 });
 
 export default app;
