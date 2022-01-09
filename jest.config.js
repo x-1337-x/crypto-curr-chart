@@ -4,6 +4,7 @@
  */
 
 module.exports = {
+    testTimeout: 15000,
     // All imported modules in your tests should be mocked automatically
     // automock: false,
 
