@@ -110,7 +110,7 @@ describe('checkAuth middleware', function () {
         expect(doneFunction).not.toBeCalled();
     });
 
-    test.only('request with token in body', async function () {
+    test('request with token in body', async function () {
         const req = createRequestMock();
         const res = createResponseMock();
 
