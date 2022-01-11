@@ -116,8 +116,6 @@ describe('checkAuth middleware', function () {
 
         req.body.token = token;
 
-        console.log({ token });
-
         await checkAuth(req as Request, res as Response, doneFunction);
 
         expect(res.statusCode).toBe(200);
